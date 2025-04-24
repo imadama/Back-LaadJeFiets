@@ -33,7 +33,7 @@ return [
 
     
     'paths' => ['api/*', '/hello', 'sanctum/csrf-cookie'],
-    'allowed_origins' => ['http://localhost:5173'],
+    'allowed_origins' => ['http://localhost:5173', 'http://localhost:5174'],
 
 
 ];

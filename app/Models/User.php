@@ -13,6 +13,15 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * Default attribute values to prevent NOT NULL constraint failures.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'name' => '',
+    ];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
