@@ -17,7 +17,6 @@ class ApiController extends Controller
 
     public function hello()
     {
-        sleep(3);
         return response()->json([
             'message' => 'Hello, World!'
         ]);
