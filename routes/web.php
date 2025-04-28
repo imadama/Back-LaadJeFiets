@@ -8,6 +8,6 @@ Route::get('/', function () {
 });
 
 Route::get('/hello', [ApiController::class, 'hello']);
-
+Route::get('/name', [ApiController::class, 'getName']);
 require __DIR__.'/auth.php';
 
