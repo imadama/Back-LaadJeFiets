@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
@@ -22,6 +25,9 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
         ]);
+
+        // Generate avatar based on initials
+        $this->generateAvatar($user);
 
         return response()->json([
             'message' => 'User registered successfully'
@@ -55,11 +61,52 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'username' => $user->username,
                 'email' => $user->email,
+                'profile_picture' => $user->profile_picture ? Storage::url($user->profile_picture) : null,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at
             ],
             'message' => 'Login successful',
             'status' => 'authenticated'
         ]);
+    }
+
+    /**
+     * Generate avatar based on user's initials using DiceBear API
+     */
+    private function generateAvatar(User $user)
+    {
+        try {
+            $initials = strtoupper(substr($user->username, 0, 2));
+            $filename = "{$user->username}_{$user->id}.png";
+            $path = "profile_pictures/{$filename}";
+
+            // Use DiceBear API to generate avatar
+            $response = Http::get("https://api.dicebear.com/7.x/initials/svg", [
+                'seed' => $initials,
+                'backgroundColor' => 'b6e3f4',
+                'textColor' => 'ffffff',
+                'size' => 200
+            ]);
+
+            if ($response->successful()) {
+                // Convert SVG to PNG using a simple API
+                $svgToPngResponse = Http::post('https://api.svg2png.com/v1', [
+                    'svg' => $response->body(),
+                    'width' => 200,
+                    'height' => 200
+                ]);
+
+                if ($svgToPngResponse->successful()) {
+                    // Save the PNG image
+                    Storage::disk('public')->put($path, $svgToPngResponse->body());
+                    
+                    // Update user's profile picture path
+                    $user->profile_picture = $path;
+                    $user->save();
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate avatar: ' . $e->getMessage());
+        }
     }
 }
