@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Socket;
+use App\Models\ErrorMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 class SocketController extends Controller
 {
     /**
-     * Get all sockets for the authenticated user.
+     * Haal alle sockets op voor de geauthenticeerde gebruiker.
      */
     public function index()
     {
@@ -23,46 +24,65 @@ class SocketController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            ErrorMessage::create([
+                'user_id' => Auth::id(),
+                'message' => 'Failed to fetch sockets: ' . $e->getMessage(),
+                'location' => 'SocketController@index',
+                'context' => ['error' => $e->getMessage()]
+            ]);
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to fetch sockets',
+                'message' => 'Kon sockets niet ophalen',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Create a new socket.
+     * Maak een nieuwe socket aan.
      */
     public function store(Request $request)
     {
-        // Validate the request data
+        // Valideer de request data
         $validator = Validator::make($request->all(), [
             'socket_id' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
+            ErrorMessage::create([
+                'user_id' => Auth::id(),
+                'message' => 'Validation failed for socket creation',
+                'location' => 'SocketController@store',
+                'context' => ['errors' => $validator->errors()->toArray()]
+            ]);
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Validation failed',
+                'message' => 'Validatie mislukt',
                 'errors' => $validator->errors()
             ], 422);
         }
 
         try {
-            // Check for duplicate socket_id for the current user
-            $existingSocket = Socket::where('user_id', Auth::id())
-                ->where('socket_id', $request->socket_id)
-                ->first();
+            // Controleer of socket_id al bestaat voor een gebruiker
+            $existingSocket = Socket::where('socket_id', $request->socket_id)->first();
 
             if ($existingSocket) {
+                ErrorMessage::create([
+                    'user_id' => Auth::id(),
+                    'message' => 'Socket ID already in use',
+                    'location' => 'SocketController@store',
+                    'context' => ['socket_id' => $request->socket_id]
+                ]);
+
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Socket ID already exists for this user'
+                    'message' => 'Socket ID wordt al gebruikt door een andere gebruiker'
                 ], 409);
             }
 
-            // Create the socket
+            // Maak de socket aan
             $socket = Socket::create([
                 'user_id' => Auth::id(),
                 'socket_id' => $request->socket_id,
@@ -70,21 +90,28 @@ class SocketController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Socket created successfully',
+                'message' => 'Socket succesvol aangemaakt',
                 'data' => $socket
             ], 201);
 
         } catch (\Exception $e) {
+            ErrorMessage::create([
+                'user_id' => Auth::id(),
+                'message' => 'Failed to create socket: ' . $e->getMessage(),
+                'location' => 'SocketController@store',
+                'context' => ['error' => $e->getMessage()]
+            ]);
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to create socket',
+                'message' => 'Kon socket niet aanmaken',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Delete a socket.
+     * Verwijder een socket.
      */
     public function destroy($id)
     {
@@ -92,9 +119,16 @@ class SocketController extends Controller
             $socket = Socket::where('user_id', Auth::id())->find($id);
 
             if (!$socket) {
+                ErrorMessage::create([
+                    'user_id' => Auth::id(),
+                    'message' => 'Socket not found or unauthorized',
+                    'location' => 'SocketController@destroy',
+                    'context' => ['socket_id' => $id]
+                ]);
+
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Socket not found or you do not have permission to delete it'
+                    'message' => 'Socket niet gevonden of u heeft geen toestemming om deze te verwijderen'
                 ], 404);
             }
 
@@ -102,13 +136,20 @@ class SocketController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Socket deleted successfully'
+                'message' => 'Socket succesvol verwijderd'
             ]);
 
         } catch (\Exception $e) {
+            ErrorMessage::create([
+                'user_id' => Auth::id(),
+                'message' => 'Failed to delete socket: ' . $e->getMessage(),
+                'location' => 'SocketController@destroy',
+                'context' => ['error' => $e->getMessage()]
+            ]);
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to delete socket',
+                'message' => 'Kon socket niet verwijderen',
                 'error' => $e->getMessage()
             ], 500);
         }

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SocketController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ErrorMessageController;
 use Intervention\Image\Facades\Image;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -22,4 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/account/{id}/changepass', [AuthController::class, 'changePassword']);
     Route::post('/account/profile-picture', [AuthController::class, 'updateProfilePicture']);
     Route::get('/profile/{username}/image', [ProfileController::class, 'getUserImage']);
+    
+    Route::get('/{user_id}/notifications', [ErrorMessageController::class, 'userNotifications']);
+    Route::delete('/{user_id}/notifications/clear', [ErrorMessageController::class, 'clearNotifications']);
 });
