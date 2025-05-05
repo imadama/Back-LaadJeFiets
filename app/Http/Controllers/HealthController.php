@@ -8,7 +8,7 @@ use PDO;
 
 class HealthController extends Controller
 {
-    private $delay = 0.5; // Delay in seconds
+    private $delay = 0; // Delay in seconds
 
     public function check()
     {
