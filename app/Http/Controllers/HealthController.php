@@ -8,8 +8,11 @@ use PDO;
 
 class HealthController extends Controller
 {
+    private $delay = 0.5; // Delay in seconds
+
     public function check()
     {
+        sleep($this->delay);
         return response()->json([
             'status' => 'online',
             'endpoints' => [
@@ -23,6 +26,7 @@ class HealthController extends Controller
 
     public function checkBackend()
     {
+        sleep($this->delay);
         return response()->json([
             'status' => 'online',
             'service' => 'backend',
@@ -32,6 +36,7 @@ class HealthController extends Controller
 
     public function checkMysql()
     {
+        sleep($this->delay);
         try {
             $pdo = new PDO(
                 "mysql:host=" . env('DB_HOST') . ";port=" . env('DB_PORT'),
@@ -56,6 +61,7 @@ class HealthController extends Controller
 
     public function checkAmafamily()
     {
+        sleep($this->delay);
         try {
             $connection = @fsockopen(
                 'amafamily.nl',
@@ -84,6 +90,7 @@ class HealthController extends Controller
 
     public function checkBroncofanclub()
     {
+        sleep($this->delay);
         try {
             $connection = @fsockopen(
                 'broncofanclub.nl',
