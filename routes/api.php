@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SocketController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ErrorMessageController;
+use App\Http\Controllers\HealthController;
 use Intervention\Image\Facades\Image;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -27,3 +28,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/{user_id}/notifications', [ErrorMessageController::class, 'userNotifications']);
     Route::delete('/{user_id}/notifications/clear', [ErrorMessageController::class, 'clearNotifications']);
 });
+
+Route::get('/health', [HealthController::class, 'check']);
+Route::get('/health/backend', [HealthController::class, 'checkBackend']);
+Route::get('/health/mysql', [HealthController::class, 'checkMysql']);
+Route::get('/health/amafamily', [HealthController::class, 'checkAmafamily']);
+Route::get('/health/broncofanclub', [HealthController::class, 'checkBroncofanclub']);
