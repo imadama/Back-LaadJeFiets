@@ -20,7 +20,6 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sockets', [SocketController::class, 'index']);
     Route::post('/socket/new', [SocketController::class, 'store']);
-    
     Route::post('/{account_id}/socket/start', [SessionController::class, 'start']);
     Route::post('/{account_id}/socket/stop', [SessionController::class, 'stop']);
     Route::delete('/socket/delete/{id}', [SocketController::class, 'destroy']);
