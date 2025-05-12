@@ -63,7 +63,14 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'profile_picture' => $user->profile_picture ? Storage::url($user->profile_picture) : null,
                 'created_at' => $user->created_at,
-                'updated_at' => $user->updated_at
+                'updated_at' => $user->updated_at,
+                'roles' => $user->roles->map(function($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                        'description' => $role->description
+                    ];
+                })
             ],
             'message' => 'Login successful',
             'status' => 'authenticated'
