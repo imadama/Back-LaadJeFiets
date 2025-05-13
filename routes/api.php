@@ -18,7 +18,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/sockets', [SocketController::class, 'index']);
+    Route::post('/sockets', [SocketController::class, 'index']);
     Route::post('/socket/new', [SocketController::class, 'store']);
     Route::post('/{account_id}/socket/start', [SessionController::class, 'start']);
     Route::post('/{account_id}/socket/stop', [SessionController::class, 'stop']);
@@ -36,3 +36,4 @@ Route::get('/health/backend', [HealthController::class, 'checkBackend']);
 Route::get('/health/mysql', [HealthController::class, 'checkMysql']);
 Route::get('/health/amafamily', [HealthController::class, 'checkAmafamily']);
 Route::get('/health/broncofanclub', [HealthController::class, 'checkBroncofanclub']);
+Route::get('/socketbelongsto/{socket_id}', [SocketController::class, 'belongsTo']);

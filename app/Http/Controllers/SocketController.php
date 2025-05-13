@@ -154,4 +154,12 @@ class SocketController extends Controller
             ], 500);
         }
     }
+
+
+    public function belongsTo($socket_id)
+    {
+        $socket = Socket::where('socket_id', $socket_id)->first();
+
+        return response()->json($socket->user);
+    }
 }
