@@ -14,6 +14,13 @@ class ApiController extends Controller
         
     }
 
+    public function getName()
+    {
+        return response()->json([
+            'name' => env('APP_NAME', 'Laravel')
+        ]);
+    }
+
 
     public function hello()
     {
