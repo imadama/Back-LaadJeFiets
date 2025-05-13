@@ -4,15 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use PhpMqtt\Client\MqttClient;
-use App\Models\LaadSessie;
-use Illuminate\Support\Facades\Auth;
 use InfluxDB2\Client;
 
-class SessionController extends Controller
+class BackupController extends Controller
 {
     public function start()
     {
-        $socketId = 'DDEAFC';
         // Get current energy reading from InfluxDB
         $client = new Client([
             'url' => env('INFLUXDB_URL'),
@@ -32,14 +29,7 @@ EOT;
 
         $result = $query->query($flux);
         $totalEnergy = $result[0]->records[0]->getValue();
-
-        // Create new charging session with energy reading
-        $session = LaadSessie::create([
-            'user_id' => Auth::id(),
-            'socket_id' => $socketId,
-            'start_time' => now(),
-            'total_energy_begin' => $totalEnergy
-        ]);
+        dd(['Total Energy at start:', $totalEnergy]);
 
         $mqtt = new MqttClient('amafamily.nl', 1883, 'laravel-client');
         $mqtt->connect(null, true, []);
@@ -53,8 +43,6 @@ EOT;
 
     public function stop()
     {
-        $socketId = 'DDEAFC';
-        
         // Get current energy reading from InfluxDB
         $client = new Client([
             'url' => env('INFLUXDB_URL'),
@@ -73,33 +61,15 @@ from(bucket: "mqttdatabase")
 EOT;
 
         $result = $query->query($flux);
-        $totalEnergy = number_format($result[0]->records[0]->getValue(), 3, '.', '');
+        $totalEnergy = $result[0]->records[0]->getValue();
+        dd(['Total Energy at stop:', $totalEnergy]);
 
-        // Find the latest charging session for this user
-        $session = LaadSessie::where('user_id', Auth::id())
-            ->where('socket_id', 'DDEAFC')
-            ->whereNull('stop_time')
-            ->latest()
-            ->first();
+        $mqtt = new MqttClient('amafamily.nl', 1883, 'laravel-client');
+        $mqtt->connect(null, true, []);
 
-        if ($session) {
-            // Calculate final energy (end - begin)
-            $finalEnergy = $totalEnergy - $session->total_energy_begin;
-
-            // Update the session with final energy reading
-            $session->update([
-                'stop_time' => now(),
-                'total_energy_end' => $totalEnergy,
-                'final_energy' => $finalEnergy
-            ]);
-
-            $mqtt = new MqttClient('amafamily.nl', 1883, 'laravel-client');
-            $mqtt->connect(null, true, []);
-
-            // Zet socket uit
-            $mqtt->publish('cmnd/charger_'.$socketId.'/Power', 'OFF', 0);
-            $mqtt->disconnect();
-        }
+        // Zet socket uit
+        $mqtt->publish('cmnd/charger_DDEAFC/Power', 'OFF', 0);
+        $mqtt->disconnect();
 
         return response()->json(['status' => 'stopped']);
     }

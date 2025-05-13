@@ -8,7 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ErrorMessageController;
 use App\Http\Controllers\HealthController;
 use Intervention\Image\Facades\Image;
-
+use App\Http\Controllers\SessionController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
