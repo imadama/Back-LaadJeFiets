@@ -9,6 +9,8 @@ use App\Http\Controllers\ErrorMessageController;
 use App\Http\Controllers\HealthController;
 use Intervention\Image\Facades\Image;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\AdminController;
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -37,3 +39,4 @@ Route::get('/health/mysql', [HealthController::class, 'checkMysql']);
 Route::get('/health/amafamily', [HealthController::class, 'checkAmafamily']);
 Route::get('/health/broncofanclub', [HealthController::class, 'checkBroncofanclub']);
 Route::get('/socketbelongsto/{socket_id}', [SocketController::class, 'belongsTo']);
+Route::post('/isuseradmin/{account_id}', [AdminController::class, 'getRoleFromUser']);
