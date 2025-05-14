@@ -9,6 +9,8 @@ use App\Http\Controllers\ErrorMessageController;
 use App\Http\Controllers\HealthController;
 use Intervention\Image\Facades\Image;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\AdminController;
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -18,7 +20,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/sockets', [SocketController::class, 'index']);
+    Route::post('/sockets', [SocketController::class, 'index']);
     Route::post('/socket/new', [SocketController::class, 'store']);
     Route::post('/{account_id}/socket/start', [SessionController::class, 'start']);
     Route::post('/{account_id}/socket/stop', [SessionController::class, 'stop']);
@@ -36,3 +38,5 @@ Route::get('/health/backend', [HealthController::class, 'checkBackend']);
 Route::get('/health/mysql', [HealthController::class, 'checkMysql']);
 Route::get('/health/amafamily', [HealthController::class, 'checkAmafamily']);
 Route::get('/health/broncofanclub', [HealthController::class, 'checkBroncofanclub']);
+Route::get('/socketbelongsto/{socket_id}', [SocketController::class, 'belongsTo']);
+Route::post('/isuseradmin/{account_id}', [AdminController::class, 'getRoleFromUser']);
