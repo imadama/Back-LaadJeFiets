@@ -188,4 +188,35 @@ class SocketController extends Controller
 
         return response()->json($socket->user);
     }
+
+    public function getSessionInfo($socket_id)
+    {
+        try {
+            // Remove 'charger_' prefix from socket_id
+            $socket_id = str_replace('charger_', '', $socket_id);
+            
+            $sessions = \DB::table('laad_sessies')
+                ->where('socket_id', $socket_id)
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $sessions
+            ]);
+
+        } catch (\Exception $e) {
+            ErrorMessage::create([
+                'user_id' => Auth::id(),
+                'message' => 'Failed to fetch sessions: ' . $e->getMessage(),
+                'location' => 'SocketController@getSessionInfo',
+                'context' => ['socket_id' => $socket_id, 'error' => $e->getMessage()]
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Kon laadsessies niet ophalen',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

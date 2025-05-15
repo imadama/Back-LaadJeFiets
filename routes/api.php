@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/account/{id}/changepass', [AuthController::class, 'changePassword']);
     Route::post('/account/profile-picture', [AuthController::class, 'updateProfilePicture']);
     Route::get('/profile/{username}/image', [ProfileController::class, 'getUserImage']);
+    Route::get('/getsessioninfo/{socket_id}', [SocketController::class, 'getSessionInfo']);
     
     Route::get('/{user_id}/notifications', [ErrorMessageController::class, 'userNotifications']);
     Route::delete('/{user_id}/notifications/clear', [ErrorMessageController::class, 'clearNotifications']);
