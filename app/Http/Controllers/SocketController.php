@@ -73,21 +73,50 @@ class SocketController extends Controller
         // Valideer de request data
         $validator = Validator::make($request->all(), [
             'socket_id' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
-            ErrorMessage::create([
-                'user_id' => Auth::id(),
-                'message' => 'Validation failed for socket creation',
-                'location' => 'SocketController@store',
-                'context' => ['errors' => $validator->errors()->toArray()]
-            ]);
+            // Check if position was provided instead of location
+            if ($request->has('position') && is_array($request->position) && count($request->position) == 2) {
+                // Convert position to location string (latitude,longitude)
+                $location = $request->position[0] . ',' . $request->position[1];
+                
+                // Check if there's no address
+                if (!$request->has('address')) {
+                    ErrorMessage::create([
+                        'user_id' => Auth::id(),
+                        'message' => 'Validation failed for socket creation - address required',
+                        'location' => 'SocketController@store',
+                        'context' => ['errors' => $validator->errors()->toArray()]
+                    ]);
 
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validatie mislukt',
-                'errors' => $validator->errors()
-            ], 422);
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Validatie mislukt',
+                        'errors' => ['address' => ['The address field is required.']]
+                    ], 422);
+                }
+                
+                $address = $request->address;
+            } else {
+                ErrorMessage::create([
+                    'user_id' => Auth::id(),
+                    'message' => 'Validation failed for socket creation',
+                    'location' => 'SocketController@store',
+                    'context' => ['errors' => $validator->errors()->toArray()]
+                ]);
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validatie mislukt',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+        } else {
+            $location = $request->location;
+            $address = $request->address;
         }
 
         try {
@@ -112,6 +141,8 @@ class SocketController extends Controller
             $socket = Socket::create([
                 'user_id' => Auth::id(),
                 'socket_id' => $request->socket_id,
+                'location' => $location,
+                'address' => $address,
             ]);
 
             return response()->json([
@@ -185,8 +216,25 @@ class SocketController extends Controller
     public function belongsTo($socket_id)
     {
         $socket = Socket::where('socket_id', $socket_id)->first();
+        
+        if (!$socket) {
+            return response()->json(['error' => 'Socket not found'], 404);
+        }
+        
+        $user = $socket->user;
+        $address = $socket->address;
+        
+        return response()->json([
+            'user' => $user,
+            'address' => $address
+        ]);
+    }
 
-        return response()->json($socket->user);
+    public function getSocketInfo($socket_id)
+    {
+        $socket = Socket::where('socket_id', $socket_id)->first();
+
+        return response()->json($socket);
     }
 
     public function getSessionInfo($socket_id)
