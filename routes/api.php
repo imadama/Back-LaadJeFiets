@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('/health', [HealthController::class, 'check']);
+Route::post('/allsockets', [SocketController::class, 'getAllSockets']);
 Route::get('/health/backend', [HealthController::class, 'checkBackend']);
 Route::get('/health/mysql', [HealthController::class, 'checkMysql']);
 Route::get('/health/amafamily', [HealthController::class, 'checkAmafamily']);

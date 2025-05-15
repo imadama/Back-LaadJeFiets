@@ -39,6 +39,32 @@ class SocketController extends Controller
         }
     }
 
+    public function getAllSockets()
+    {
+        try {
+            $sockets = Socket::all();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $sockets
+            ]);
+
+        } catch (\Exception $e) {
+            ErrorMessage::create([
+                'user_id' => Auth::id(),
+                'message' => 'Failed to fetch all sockets: ' . $e->getMessage(),
+                'location' => 'SocketController@getAllSockets', 
+                'context' => ['error' => $e->getMessage()]
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Kon alle sockets niet ophalen',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Maak een nieuwe socket aan.
      */
