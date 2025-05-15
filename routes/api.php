@@ -22,8 +22,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/sockets', [SocketController::class, 'index']);
     Route::post('/socket/new', [SocketController::class, 'store']);
-    Route::post('/{account_id}/socket/start', [SessionController::class, 'start']);
-    Route::post('/{account_id}/socket/stop', [SessionController::class, 'stop']);
+
+    Route::post('/{account_id}/socket/start/{socket_id}', [SessionController::class, 'start']);
+    Route::post('/{account_id}/socket/stop/{socket_id}', [SessionController::class, 'stop']);
+    
     Route::delete('/socket/delete/{id}', [SocketController::class, 'destroy']);
     Route::post('/account/{id}/changepass', [AuthController::class, 'changePassword']);
     Route::post('/account/profile-picture', [AuthController::class, 'updateProfilePicture']);
@@ -42,3 +44,4 @@ Route::get('/health/amafamily', [HealthController::class, 'checkAmafamily']);
 Route::get('/health/broncofanclub', [HealthController::class, 'checkBroncofanclub']);
 Route::get('/socketbelongsto/{socket_id}', [SocketController::class, 'belongsTo']);
 Route::post('/isuseradmin/{account_id}', [AdminController::class, 'getRoleFromUser']);
+Route::get('/socketinfo/{socket_id}', [SocketController::class, 'getSocketInfo']);

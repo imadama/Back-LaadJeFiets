@@ -12,7 +12,13 @@ class SessionController extends Controller
 {
     public function start()
     {
-        $socketId = 'DDEAFC';
+        $socketId = request('socket_id');
+        
+        // Extract socket ID from the request and remove 'charger_' prefix if present
+        $socketId = request('socket_id');
+        if (strpos($socketId, 'charger_') === 0) {
+            $socketId = substr($socketId, strlen('charger_'));
+        }
         // Get current energy reading from InfluxDB
         $client = new Client([
             'url' => env('INFLUXDB_URL'),
@@ -25,7 +31,7 @@ class SessionController extends Controller
         $flux = <<<EOT
 from(bucket: "mqttdatabase")
   |> range(start: -1m)
-  |> filter(fn: (r) => r["_measurement"] == "charger_DDEAFC/SENSOR")
+  |> filter(fn: (r) => r["_measurement"] == "charger_{$socketId}/SENSOR")
   |> filter(fn: (r) => r["_field"] == "Total")
   |> last()
 EOT;
@@ -45,7 +51,7 @@ EOT;
         $mqtt->connect(null, true, []);
 
         // Zet socket aan
-        $mqtt->publish('cmnd/charger_DDEAFC/Power', 'ON', 0);
+        $mqtt->publish('cmnd/charger_'.$socketId.'/Power', 'ON', 0);
         $mqtt->disconnect();
 
         return response()->json(['status' => 'started']);
@@ -53,7 +59,13 @@ EOT;
 
     public function stop()
     {
-        $socketId = 'DDEAFC';
+        $socketId = request('socket_id');
+        
+        // Extract socket ID from the request and remove 'charger_' prefix if present
+        $socketId = request('socket_id');
+        if (strpos($socketId, 'charger_') === 0) {
+            $socketId = substr($socketId, strlen('charger_'));
+        }
         
         // Get current energy reading from InfluxDB
         $client = new Client([
@@ -67,7 +79,7 @@ EOT;
         $flux = <<<EOT
 from(bucket: "mqttdatabase")
   |> range(start: -1m)
-  |> filter(fn: (r) => r["_measurement"] == "charger_DDEAFC/SENSOR")
+  |> filter(fn: (r) => r["_measurement"] == "charger_{$socketId}/SENSOR")
   |> filter(fn: (r) => r["_field"] == "Total")
   |> last()
 EOT;
@@ -77,7 +89,7 @@ EOT;
 
         // Find the latest charging session for this user
         $session = LaadSessie::where('user_id', Auth::id())
-            ->where('socket_id', 'DDEAFC')
+            ->where('socket_id', $socketId)
             ->whereNull('stop_time')
             ->latest()
             ->first();

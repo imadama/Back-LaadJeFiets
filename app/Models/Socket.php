@@ -17,6 +17,8 @@ class Socket extends Model
     protected $fillable = [
         'user_id',
         'socket_id',
+        'location',
+        'address',
     ];
 
     /**
