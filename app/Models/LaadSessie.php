@@ -31,4 +31,9 @@ class LaadSessie extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function socket()
+    {
+        return $this->belongsTo(Socket::class, 'socket_id', 'socket_id');
+    }
 }

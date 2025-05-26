@@ -45,3 +45,6 @@ Route::get('/health/broncofanclub', [HealthController::class, 'checkBroncofanclu
 Route::get('/socketbelongsto/{socket_id}', [SocketController::class, 'belongsTo']);
 Route::post('/isuseradmin/{account_id}', [AdminController::class, 'getRoleFromUser']);
 Route::get('/socketinfo/{socket_id}', [SocketController::class, 'getSocketInfo']);
+
+// Admin statistieken route
+Route::get('/admin/stats', [App\Http\Controllers\AdminController::class, 'getStats']);

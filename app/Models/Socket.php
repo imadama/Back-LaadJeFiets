@@ -28,4 +28,12 @@ class Socket extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Get the laad sessies for this socket.
+     */
+    public function laadSessies()
+    {
+        return $this->hasMany(LaadSessie::class, 'socket_id', 'socket_id');
+    }
 } 
