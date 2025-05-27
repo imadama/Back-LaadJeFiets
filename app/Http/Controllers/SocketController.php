@@ -267,4 +267,37 @@ class SocketController extends Controller
             ], 500);
         }
     }
+
+    public function bulkBelongsTo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'socket_ids' => 'required|array',
+            'socket_ids.*' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validatie mislukt',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $sockets = Socket::whereIn('socket_id', $request->socket_ids)
+            ->with('user')
+            ->get();
+
+        $result = $sockets->map(function ($socket) {
+            return [
+                'socket_id' => $socket->socket_id,
+                'user' => $socket->user,
+                'address' => $socket->address
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $result
+        ]);
+    }
 }

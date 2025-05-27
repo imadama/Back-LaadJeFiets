@@ -43,6 +43,7 @@ Route::get('/health/mysql', [HealthController::class, 'checkMysql']);
 Route::get('/health/amafamily', [HealthController::class, 'checkAmafamily']);
 Route::get('/health/broncofanclub', [HealthController::class, 'checkBroncofanclub']);
 Route::get('/socketbelongsto/{socket_id}', [SocketController::class, 'belongsTo']);
+Route::post('/socketbelongsto/bulk', [SocketController::class, 'bulkBelongsTo']);
 Route::post('/isuseradmin/{account_id}', [AdminController::class, 'getRoleFromUser']);
 Route::get('/socketinfo/{socket_id}', [SocketController::class, 'getSocketInfo']);
 
