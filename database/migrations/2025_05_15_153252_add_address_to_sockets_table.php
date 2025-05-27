@@ -12,7 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sockets', function (Blueprint $table) {
-            $table->string('address')->default('Onbekend')->after('location');
+            // Verwijder de location kolom als deze bestaat
+            if (Schema::hasColumn('sockets', 'location')) {
+                $table->dropColumn('location');
+            }
+            
+            // Voeg de address kolom toe als deze nog niet bestaat
+            if (!Schema::hasColumn('sockets', 'address')) {
+                $table->string('address')->default('Onbekend')->after('socket_id');
+            }
         });
     }
 
@@ -22,7 +30,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('sockets', function (Blueprint $table) {
-            $table->dropColumn('address');
+            // Verwijder de address kolom als deze bestaat
+            if (Schema::hasColumn('sockets', 'address')) {
+                $table->dropColumn('address');
+            }
+            
+            // Voeg de location kolom toe als deze nog niet bestaat
+            if (!Schema::hasColumn('sockets', 'location')) {
+                $table->string('location')->default('Onbekend')->after('socket_id');
+            }
         });
     }
-};
+}; 
