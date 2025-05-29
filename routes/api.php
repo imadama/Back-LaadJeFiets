@@ -10,6 +10,7 @@ use App\Http\Controllers\HealthController;
 use Intervention\Image\Facades\Image;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -34,7 +35,13 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::get('/{user_id}/notifications', [ErrorMessageController::class, 'userNotifications']);
     Route::delete('/{user_id}/notifications/clear', [ErrorMessageController::class, 'clearNotifications']);
+
+    // User management routes
+    Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
 });
+
+Route::get('/users', [UserController::class, 'getAllUsers']);
 
 Route::get('/health', [HealthController::class, 'check']);
 Route::post('/allsockets', [SocketController::class, 'getAllSockets']);
