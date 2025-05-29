@@ -73,7 +73,7 @@ class SocketController extends Controller
         // Valideer de request data
         $validator = Validator::make($request->all(), [
             'socket_id' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
+            'location_id' => 'required|exists:locations,id',
         ]);
 
         if ($validator->fails()) {
@@ -109,11 +109,15 @@ class SocketController extends Controller
                 ], 409);
             }
 
+            // Haal het adres op van de locatie
+            $location = \App\Models\Location::find($request->location_id);
+
             // Maak de socket aan
             $socket = Socket::create([
                 'user_id' => Auth::id(),
                 'socket_id' => $request->socket_id,
-                'address' => $request->address,
+                'address' => $location->address,
+                'location_id' => $location->id,
             ]);
 
             return response()->json([

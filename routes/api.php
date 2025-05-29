@@ -11,6 +11,7 @@ use Intervention\Image\Facades\Image;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LocationController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -56,3 +57,7 @@ Route::get('/socketinfo/{socket_id}', [SocketController::class, 'getSocketInfo']
 
 // Admin statistieken route
 Route::get('/admin/stats', [App\Http\Controllers\AdminController::class, 'getStats']);
+
+Route::get('/locations', [LocationController::class, 'index']);
+Route::post('/locations', [LocationController::class, 'store']);
+Route::get('/locations/user/{user_id}', [LocationController::class, 'userLocations']);
