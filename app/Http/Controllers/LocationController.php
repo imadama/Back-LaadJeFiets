@@ -67,5 +67,38 @@ class LocationController extends Controller
         $socket->update(['location_id' => null]);
         return response()->json(['message' => 'Socket removed from location successfully']);
     }
+
+    /**
+     * Wijs een socket toe aan een locatie.
+     */
+    public function assignSocket($locationId, $socketId)
+    {
+        try {
+            // Controleer of de locatie bestaat
+            $location = Location::findOrFail($locationId);
+            
+            // Controleer of de socket bestaat
+            $socket = Socket::findOrFail($socketId);
+            
+            // Update de socket met de nieuwe locatie
+            $socket->update([
+                'location_id' => $locationId,
+                'address' => $location->address
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Socket succesvol toegewezen aan locatie',
+                'data' => $socket
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Kon socket niet toewijzen aan locatie',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 } 
 

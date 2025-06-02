@@ -275,4 +275,33 @@ class SocketController extends Controller
             'data' => $result
         ]);
     }
+
+    /**
+     * Haal alle sockets op die nog geen locatie hebben toegewezen.
+     */
+    public function getAvailableSockets()
+    {
+        try {
+            $sockets = Socket::whereNull('location_id')->get();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $sockets
+            ]);
+
+        } catch (\Exception $e) {
+            ErrorMessage::create([
+                'user_id' => Auth::id(),
+                'message' => 'Failed to fetch available sockets: ' . $e->getMessage(),
+                'location' => 'SocketController@getAvailableSockets',
+                'context' => ['error' => $e->getMessage()]
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Kon beschikbare sockets niet ophalen',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

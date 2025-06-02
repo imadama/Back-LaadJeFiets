@@ -58,6 +58,10 @@ Route::get('/socketinfo/{socket_id}', [SocketController::class, 'getSocketInfo']
 // Admin statistieken route
 Route::get('/admin/stats', [App\Http\Controllers\AdminController::class, 'getStats']);
 
+// Socket beschikbaarheid en toewijzing routes
+Route::get('/sockets/available', [SocketController::class, 'getAvailableSockets']);
+Route::post('/locations/{locationId}/sockets/{socketId}', [LocationController::class, 'assignSocket']);
+
 Route::get('/locations', [LocationController::class, 'index']);
 Route::post('/locations', [LocationController::class, 'store']);
 Route::get('/locations/user/{user_id}', [LocationController::class, 'userLocations']);
