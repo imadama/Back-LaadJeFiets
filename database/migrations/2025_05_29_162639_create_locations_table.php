@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('laad_sessies', function (Blueprint $table) {
+        Schema::create('locations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->timestamp('start_time');
-            $table->timestamp('stop_time')->nullable();
-            $table->decimal('total_energy_begin', 10, 2);
-            $table->decimal('total_energy_end', 10, 2)->nullable();
+            $table->unsignedBigInteger('user_id');
+            $table->string('name');
+            $table->string('address');
+            $table->decimal('tariff_per_kwh', 8, 2);
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('laad_sessies');
+        Schema::dropIfExists('locations');
     }
 };

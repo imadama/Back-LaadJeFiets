@@ -73,50 +73,22 @@ class SocketController extends Controller
         // Valideer de request data
         $validator = Validator::make($request->all(), [
             'socket_id' => 'required|string|max:255',
-            'location' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
+            'location_id' => 'required|exists:locations,id',
         ]);
 
         if ($validator->fails()) {
-            // Check if position was provided instead of location
-            if ($request->has('position') && is_array($request->position) && count($request->position) == 2) {
-                // Convert position to location string (latitude,longitude)
-                $location = $request->position[0] . ',' . $request->position[1];
-                
-                // Check if there's no address
-                if (!$request->has('address')) {
-                    ErrorMessage::create([
-                        'user_id' => Auth::id(),
-                        'message' => 'Validation failed for socket creation - address required',
-                        'location' => 'SocketController@store',
-                        'context' => ['errors' => $validator->errors()->toArray()]
-                    ]);
+            ErrorMessage::create([
+                'user_id' => Auth::id(),
+                'message' => 'Validation failed for socket creation',
+                'location' => 'SocketController@store',
+                'context' => ['errors' => $validator->errors()->toArray()]
+            ]);
 
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Validatie mislukt',
-                        'errors' => ['address' => ['The address field is required.']]
-                    ], 422);
-                }
-                
-                $address = $request->address;
-            } else {
-                ErrorMessage::create([
-                    'user_id' => Auth::id(),
-                    'message' => 'Validation failed for socket creation',
-                    'location' => 'SocketController@store',
-                    'context' => ['errors' => $validator->errors()->toArray()]
-                ]);
-
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Validatie mislukt',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-        } else {
-            $location = $request->location;
-            $address = $request->address;
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validatie mislukt',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         try {
@@ -137,12 +109,15 @@ class SocketController extends Controller
                 ], 409);
             }
 
+            // Haal het adres op van de locatie
+            $location = \App\Models\Location::find($request->location_id);
+
             // Maak de socket aan
             $socket = Socket::create([
                 'user_id' => Auth::id(),
                 'socket_id' => $request->socket_id,
-                'location' => $location,
-                'address' => $address,
+                'address' => $location->address,
+                'location_id' => $location->id,
             ]);
 
             return response()->json([
@@ -263,6 +238,68 @@ class SocketController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Kon laadsessies niet ophalen',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function bulkBelongsTo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'socket_ids' => 'required|array',
+            'socket_ids.*' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validatie mislukt',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $sockets = Socket::whereIn('socket_id', $request->socket_ids)
+            ->with('user')
+            ->get();
+
+        $result = $sockets->map(function ($socket) {
+            return [
+                'socket_id' => $socket->socket_id,
+                'user' => $socket->user,
+                'address' => $socket->address
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $result
+        ]);
+    }
+
+    /**
+     * Haal alle sockets op die nog geen locatie hebben toegewezen.
+     */
+    public function getAvailableSockets()
+    {
+        try {
+            $sockets = Socket::whereNull('location_id')->get();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $sockets
+            ]);
+
+        } catch (\Exception $e) {
+            ErrorMessage::create([
+                'user_id' => Auth::id(),
+                'message' => 'Failed to fetch available sockets: ' . $e->getMessage(),
+                'location' => 'SocketController@getAvailableSockets',
+                'context' => ['error' => $e->getMessage()]
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Kon beschikbare sockets niet ophalen',
                 'error' => $e->getMessage()
             ], 500);
         }

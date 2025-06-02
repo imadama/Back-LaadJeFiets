@@ -17,8 +17,8 @@ class Socket extends Model
     protected $fillable = [
         'user_id',
         'socket_id',
-        'location',
         'address',
+        'location_id',
     ];
 
     /**
@@ -35,5 +35,13 @@ class Socket extends Model
     public function laadSessies()
     {
         return $this->hasMany(LaadSessie::class, 'socket_id', 'socket_id');
+    }
+
+    /**
+     * Get the location for this socket.
+     */
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
     }
 } 
