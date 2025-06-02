@@ -57,5 +57,15 @@ class LocationController extends Controller
         $location->delete();
         return response()->json(['message' => 'Location deleted successfully']);
     }
+
+    public function destroySocket($locations_id, $socket_id)
+    {
+        $socket = Socket::where('location_id', $locations_id)
+            ->where('id', $socket_id)
+            ->firstOrFail();
+            
+        $socket->update(['location_id' => null]);
+        return response()->json(['message' => 'Socket removed from location successfully']);
+    }
 } 
 

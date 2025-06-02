@@ -64,3 +64,4 @@ Route::get('/locations/user/{user_id}', [LocationController::class, 'userLocatio
 Route::get('/locations/{locations_id}', [LocationController::class, 'show']);
 Route::get('/locations/{locations_id}/sockets', [LocationController::class, 'showSockets']);
 Route::delete('/locations/{locations_id}', [LocationController::class, 'destroy']);
+Route::delete('/locations/{locations_id}/sockets/{socket_id}', [LocationController::class, 'destroySocket']);
