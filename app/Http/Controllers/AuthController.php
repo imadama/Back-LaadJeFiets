@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Credit; // Add this at the top with other imports
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -24,6 +25,12 @@ class AuthController extends Controller
             'username' => $validated['username'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+        ]);
+
+        // Create a credit entry for the new user with 0 credits
+        Credit::create([
+            'user_id' => $user->id,
+            'credits' => 0.00,
         ]);
 
         // Generate avatar based on initials

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('sockets', function (Blueprint $table) {
             $table->dropColumn(['name', 'ip', 'port']);
             $table->string('socket_id')->after('user_id');
+            $table->unsignedBigInteger('location_id')->after('socket_id'); // Add location_id column
         });
     }
 
@@ -26,7 +27,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('ip');
             $table->integer('port');
-            $table->dropColumn('socket_id');
+            $table->dropColumn(['socket_id', 'location_id']); // Drop both columns
         });
     }
-}; 
+};
