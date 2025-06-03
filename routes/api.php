@@ -12,6 +12,7 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\CreditController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -32,6 +33,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/account/{id}/changepass', [AuthController::class, 'changePassword']);
     Route::post('/account/profile-picture', [AuthController::class, 'updateProfilePicture']);
     Route::get('/profile/{username}/image', [ProfileController::class, 'getUserImage']);
+    Route::get('/credits/balance', [CreditController::class, 'getBalance']);
+    Route::post('/credits/balance/add', [CreditController::class, 'addBalance']);
     Route::get('/getsessioninfo/{socket_id}', [SocketController::class, 'getSessionInfo']);
     
     Route::get('/{user_id}/notifications', [ErrorMessageController::class, 'userNotifications']);
