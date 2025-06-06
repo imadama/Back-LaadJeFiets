@@ -8,8 +8,27 @@ use App\Models\LaadSessie;
 use Illuminate\Support\Facades\Auth;
 use InfluxDB2\Client;
 
+/**
+ * SessionController
+ * 
+ * Deze controller beheert de laadsessies voor elektrische fietsen.
+ * Het implementeert de functionaliteit voor het starten en stoppen van laadsessies,
+ * inclusief het bijhouden van energieverbruik via InfluxDB en het besturen van
+ * sockets via MQTT.
+ */
 class SessionController extends Controller
 {
+    /**
+     * Start een nieuwe laadsessie
+     * 
+     * Deze methode:
+     * 1. Haalt het socket ID op en normaliseert deze
+     * 2. Leest het huidige energieverbruik uit InfluxDB
+     * 3. Maakt een nieuwe laadsessie aan in de database
+     * 4. Schakelt de laadpaal aan via MQTT
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function start()
     {
         $socketId = request('socket_id');
@@ -57,6 +76,19 @@ EOT;
         return response()->json(['status' => 'started']);
     }
 
+    /**
+     * Stop een actieve laadsessie
+     * 
+     * Deze methode:
+     * 1. Haalt het socket ID op en normaliseert deze
+     * 2. Leest het huidige energieverbruik uit InfluxDB
+     * 3. Vindt de actieve sessie voor deze gebruiker
+     * 4. Berekent het totale energieverbruik
+     * 5. Update de sessie in de database
+     * 6. Schakelt de laadpaal uit via MQTT
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function stop()
     {
         $socketId = request('socket_id');
