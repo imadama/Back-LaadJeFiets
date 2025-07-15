@@ -26,7 +26,7 @@ class LocationController extends Controller
             'latitude' => 'numeric',
             'longitude' => 'numeric',
             'user_id' => 'required|exists:users,id',
-            'tariff_per_kwh' => 'numeric'
+            'tarrif_per_kwh' => 'numeric'
         ]);
 
         $location = Location::create($validated);
