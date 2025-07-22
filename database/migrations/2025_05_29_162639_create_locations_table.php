@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('name');
             $table->string('address');
-            $table->decimal('tariff_per_kwh', 8, 2);
+            $table->decimal('tarrif_per_kwh', 8, 2);
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

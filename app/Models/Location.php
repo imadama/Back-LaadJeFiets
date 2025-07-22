@@ -13,6 +13,6 @@ class Location extends Model
         'user_id',
         'name',
         'address',
-        'tariff_per_kwh'
+        'tarrif_per_kwh'
     ];
 }
