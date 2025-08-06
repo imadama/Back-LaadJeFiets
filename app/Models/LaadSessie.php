@@ -12,6 +12,7 @@ class LaadSessie extends Model
     protected $fillable = [
         'user_id',
         'socket_id',
+        'duration_minutes',
         'start_time',
         'stop_time',
         'total_energy_begin',

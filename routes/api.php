@@ -41,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/credits/balance', [CreditController::class, 'getBalance']);
     Route::get('/credits/balance/{userId}', [CreditController::class, 'getUserBalance']);
     Route::post('/credits/balance/add', [CreditController::class, 'addBalance']);
+    Route::post('/credits/deduct', [CreditController::class, 'deductCredits']);
     Route::put('/credits/admin/adjust/{userId}', [CreditController::class, 'adminAdjustBalance']);
     Route::put('/credits/admin/set/{userId}', [CreditController::class, 'adminSetBalance']);
     Route::get('/getsessioninfo/{socket_id}', [SocketController::class, 'getSessionInfo']);

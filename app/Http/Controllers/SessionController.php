@@ -7,6 +7,7 @@ use PhpMqtt\Client\MqttClient;
 use App\Models\LaadSessie;
 use Illuminate\Support\Facades\Auth;
 use InfluxDB2\Client;
+use App\Jobs\StopSessionJob;
 
 /**
  * SessionController
@@ -26,15 +27,17 @@ class SessionController extends Controller
      * 2. Leest het huidige energieverbruik uit InfluxDB
      * 3. Maakt een nieuwe laadsessie aan in de database
      * 4. Schakelt de laadpaal aan via MQTT
+     * 5. Plant automatische stop als duration_minutes is opgegeven
      * 
      * @return \Illuminate\Http\JsonResponse
      */
-    public function start()
+    public function start(Request $request)
     {
-        $socketId = request('socket_id');
+        $socketId = $request->input('socket_id');
+        $durationMinutes = $request->input('duration_minutes');
         
         // Extract socket ID from the request and remove 'charger_' prefix if present
-        $socketId = request('socket_id');
+        $socketId = $request->input('socket_id');
         if (strpos($socketId, 'charger_') === 0) {
             $socketId = substr($socketId, strlen('charger_'));
         }
@@ -62,6 +65,7 @@ EOT;
         $session = LaadSessie::create([
             'user_id' => Auth::id(),
             'socket_id' => $socketId,
+            'duration_minutes' => $durationMinutes,
             'start_time' => now(),
             'total_energy_begin' => $totalEnergy
         ]);
@@ -73,7 +77,16 @@ EOT;
         $mqtt->publish('cmnd/charger_'.$socketId.'/Power', 'ON', 0);
         $mqtt->disconnect();
 
-        return response()->json(['status' => 'started']);
+        // Als duration_minutes is opgegeven, plan automatische stop
+        if ($durationMinutes && $durationMinutes > 0) {
+            StopSessionJob::dispatch($session->id)->delay(now()->addMinutes($durationMinutes));
+        }
+
+        return response()->json([
+            'status' => 'started',
+            'session_id' => $session->id,
+            'duration_minutes' => $durationMinutes
+        ]);
     }
 
     /**

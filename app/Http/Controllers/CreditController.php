@@ -189,4 +189,61 @@ class CreditController extends Controller
             'new_balance' => $credit->credits
         ]);
     }
+
+    public function deductCredits(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Niet geautoriseerd'], 401);
+        }
+
+        // Valideer de benodigde velden in de request
+        $validated = $request->validate([
+            'minutes' => 'required|integer|min:1',
+            'tariff_per_kwh' => 'required|numeric|min:0',
+            'amount' => 'required|numeric|min:0'
+        ]);
+
+        $minuten = $validated['minutes'];
+        $tariefPerKwh = $validated['tariff_per_kwh'];
+        $bedrag = $validated['amount'];
+
+        // Rond het bedrag af op 2 decimalen
+        $bedragAfTeTrekken = round($bedrag, 2);
+
+        if ($bedragAfTeTrekken <= 0) {
+            return response()->json(['error' => 'Ongeldig af te trekken bedrag'], 400);
+        }
+
+        $credit = Credit::where('user_id', $user->id)->first();
+
+        if (!$credit) {
+            return response()->json(['error' => 'Credit record niet gevonden'], 404);
+        }
+
+        // Controleer of de gebruiker genoeg credits heeft
+        if ($credit->credits < $bedragAfTeTrekken) {
+            return response()->json([
+                'error' => 'Onvoldoende credits',
+                'huidig_saldo' => $credit->credits,
+                'benodigd_bedrag' => $bedragAfTeTrekken
+            ], 400);
+        }
+
+        // Trek de credits af
+        $credit->credits -= $bedragAfTeTrekken;
+        $credit->save();
+
+        return response()->json([
+            'boodschap' => 'Credits succesvol afgetrokken',
+            'afgetrokken_bedrag' => $bedragAfTeTrekken,
+            'nieuw_saldo' => $credit->credits,
+            'details' => [
+                'minuten' => $minuten,
+                'tarief_per_kwh' => $tariefPerKwh,
+                'origineel_bedrag' => $bedrag
+            ]
+        ]);
+    }
 }
