@@ -70,6 +70,14 @@ Route::get('/socketinfo/{socket_id}', [SocketController::class, 'getSocketInfo']
 // Admin statistieken route
 Route::get('/admin/stats', [App\Http\Controllers\AdminController::class, 'getStats']);
 
+// Admin QR code routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::match(['GET', 'POST'], '/admin/qr-codes', [AdminController::class, 'generateQrCodes']);
+    Route::match(['GET', 'POST'], '/admin/qr-codes/{socketId}', [AdminController::class, 'generateSingleQrCode']);
+    Route::match(['GET', 'POST'], '/admin/generate-qr', [AdminController::class, 'generateQrCodes']);
+    Route::match(['GET', 'POST'], '/admin/generate-qr/{socketId}', [AdminController::class, 'generateSingleQrCode']);
+});
+
 // Socket beschikbaarheid en toewijzing routes
 Route::get('/sockets/available', [SocketController::class, 'getAvailableSockets']);
 Route::post('/locations/{locationId}/sockets/{socketId}', [LocationController::class, 'assignSocket']);
